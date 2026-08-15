@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../common/icon_circle.dart';
 
 class QuickActionButton extends StatelessWidget {
   final IconData icon;
@@ -22,15 +23,11 @@ class QuickActionButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 50,
-            height: 50,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.softPink,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppColors.primaryRed, size: 22),
+          IconCircle(
+            icon: icon,
+            background: AppColors.softPink,
+            iconColor: AppColors.primaryRed,
+            size: 50,
           ),
           const SizedBox(height: 6),
           SizedBox(

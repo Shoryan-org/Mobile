@@ -6,8 +6,9 @@ import '../../models/blood_type.dart';
 class BloodTypeAvatar extends StatelessWidget {
   final BloodType bloodType;
   final double size;
+  final bool filled;
 
-  const BloodTypeAvatar({super.key, required this.bloodType, this.size = 44});
+  const BloodTypeAvatar({super.key, required this.bloodType, this.size = 44,this.filled = true});
 
   @override
   Widget build(BuildContext context) {
