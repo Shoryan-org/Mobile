@@ -16,7 +16,11 @@ import '../../widgets/home/donor_status_card.dart';
 import '../../widgets/home/lives_saved_banner.dart';
 import '../../widgets/home/quick_action_button.dart';
 import '../../widgets/requests/request_card.dart';
-
+import '../create_request/create_request_screen.dart';
+import '../eligibility/eligibility_screen.dart';
+import '../emergency/emergency_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../smart_matching/smart_matching_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final BloodRequestRepository requestRepository;
@@ -86,14 +90,43 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: _loadData,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: _HomeHeader(donor: donor)),
+            SliverToBoxAdapter(
+              child: _HomeHeader(
+                donor: donor,
+                onNotificationsTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                ),
+              ),
+            ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  DonorStatusCard(profile: donor),
+                  DonorStatusCard(
+                    profile: donor,
+                    onViewEligibility: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => EligibilityScreen(donorRepository: widget.donorRepository),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 18),
-                  const _QuickActionsRow(),
+                  _QuickActionsRow(
+                    onNewRequest: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => CreateRequestScreen()),
+                    ),
+                    onUrgent: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => EmergencyScreen()),
+                    ),
+                    onFindDonors: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => SmartMatchingScreen()),
+                    ),
+                    onEligibility: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => EligibilityScreen(donorRepository: widget.donorRepository),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 22),
                   SectionHeader(
                     title: 'Urgent near you',
@@ -140,8 +173,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _HomeHeader extends StatelessWidget {
   final DonorProfile donor;
+  final VoidCallback? onNotificationsTap;
 
-  const _HomeHeader({required this.donor});
+  const _HomeHeader({required this.donor, this.onNotificationsTap});
 
   @override
   Widget build(BuildContext context) {
@@ -199,16 +233,39 @@ class _HomeHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.white.withOpacity(0.15),
-                  shape: BoxShape.circle,
+              InkWell(
+                onTap: onNotificationsTap,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.notifications_outlined,
+                          color: AppColors.white, size: 20),
+                      if (donor.unreadNotificationsCount > 0)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            width: 9,
+                            height: 9,
+                            decoration: BoxDecoration(
+                              color: AppColors.softPink,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.primaryRed, width: 1.5),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                child: const Icon(Icons.notifications_outlined,
-                    color: AppColors.white, size: 20),
               ),
             ],
           ),
@@ -219,21 +276,31 @@ class _HomeHeader extends StatelessWidget {
 }
 
 class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow();
+  final VoidCallback? onNewRequest;
+  final VoidCallback? onUrgent;
+  final VoidCallback? onFindDonors;
+  final VoidCallback? onEligibility;
+
+  const _QuickActionsRow({
+    this.onNewRequest,
+    this.onUrgent,
+    this.onFindDonors,
+    this.onEligibility,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        QuickActionButton(icon: Icons.add, label: 'New request', onTap: () {}),
-        QuickActionButton(icon: Icons.bolt, label: 'Urgent', onTap: () {}),
+        QuickActionButton(icon: Icons.add, label: 'New request', onTap: onNewRequest),
+        QuickActionButton(icon: Icons.bolt, label: 'Urgent', onTap: onUrgent),
         QuickActionButton(
-            icon: Icons.people_outline, label: 'Find donors', onTap: () {}),
+            icon: Icons.people_outline, label: 'Find donors', onTap: onFindDonors),
         QuickActionButton(
             icon: Icons.event_available_outlined,
             label: 'Eligibility',
-            onTap: () {}),
+            onTap: onEligibility),
       ],
     );
   }
