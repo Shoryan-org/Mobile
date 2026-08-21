@@ -8,12 +8,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shoryan/core/network/token_storage.dart';
 import 'package:shoryan/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final tokenStorage = TokenStorage(prefs);
+
+    await tester.pumpWidget(ShoryanApp(tokenStorage: tokenStorage));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _dismissRequest(String id) {
+  void _dismissRequest(int id) {
     setState(() => _urgentRequests.removeWhere((r) => r.id == id));
   }
 

@@ -7,12 +7,16 @@ import 'urgency_badge.dart';
 
 class RequestCard extends StatelessWidget {
   final BloodRequest request;
+  final bool isDonorView;
+  final bool isAccepted;
   final VoidCallback? onAccept;
   final VoidCallback? onDismiss;
 
   const RequestCard({
     super.key,
     required this.request,
+    this.isDonorView = true,
+    this.isAccepted = false,
     this.onAccept,
     this.onDismiss,
   });
@@ -85,19 +89,44 @@ class RequestCard extends StatelessWidget {
               valueColor: const AlwaysStoppedAnimation(AppColors.primaryRed),
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onAccept,
-                  child: const Text('Accept request'),
+          if (request.notes != null && request.notes!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Notes: ${request.notes}',
+              style: AppTextStyles.metaText.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ],
+          if (isDonorView && !isAccepted) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onAccept,
+                    child: const Text('Accept request'),
+                  ),
                 ),
+                const SizedBox(width: 10),
+                _DismissButton(onTap: onDismiss),
+              ],
+            ),
+          ],
+          if (isDonorView && isAccepted) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.primaryRed.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(width: 10),
-              _DismissButton(onTap: onDismiss),
-            ],
-          ),
+              child: const Text(
+                'Accepted',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.primaryRed, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ],
       ),
     );

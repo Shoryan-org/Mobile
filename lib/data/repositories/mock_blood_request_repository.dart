@@ -1,74 +1,50 @@
 import '../../models/blood_request.dart';
+import '../../models/blood_response_model.dart';
 import '../../models/blood_type.dart';
 import '../../models/request_filter.dart';
 import '../../models/urgency_level.dart';
+import '../../models/hospital_model.dart';
+import '../../models/requester_model.dart';
+import '../../models/smart_matching_response.dart';
 import 'blood_request_repository.dart';
 
-/// Static in-memory dataset that mirrors the requests shown in the UI
-/// mockups, wrapped in fake network delays so the loading states in
-/// HomeScreen/RequestsScreen already behave like they will against the
-/// real API.
 class MockBloodRequestRepository implements BloodRequestRepository {
   static final List<BloodRequest> _requests = [
-    const BloodRequest(
-      id: 'r1',
-      hospitalName: 'Al Nahda General Hospital',
-      area: 'Nasr City',
-      requesterName: 'Mariam H.',
+    BloodRequest(
+      id: 1,
+      status: 'PENDING',
       bloodType: BloodType.oNegative,
       urgency: UrgencyLevel.critical,
-      distanceKm: 1.2,
-      postedAgo: '6 min ago',
-      unitsCollected: 1,
-      unitsNeeded: 3,
+      noOfUnits: 3,
+      noOfUnitsDonated: 1,
+      distance: 1.2,
+      requestedAt: '6 min ago',
+      hospital: const HospitalModel(id: 1, name: 'Al Nahda General Hospital', addressText: 'Nasr City'),
+      requester: const RequesterModel(id: 1, name: 'Mariam H.'),
     ),
-    const BloodRequest(
-      id: 'r2',
-      hospitalName: 'Ain Shams University Hospital',
-      area: 'Abbasia',
-      requesterName: 'Nour E.',
+    BloodRequest(
+      id: 2,
+      status: 'PENDING',
       bloodType: BloodType.oPositive,
       urgency: UrgencyLevel.critical,
-      distanceKm: 3.6,
-      postedAgo: '12 min ago',
-      unitsCollected: 3,
-      unitsNeeded: 5,
+      noOfUnits: 5,
+      noOfUnitsDonated: 3,
+      distance: 3.6,
+      requestedAt: '12 min ago',
+      hospital: const HospitalModel(id: 2, name: 'Ain Shams University Hospital', addressText: 'Abbasia'),
+      requester: const RequesterModel(id: 2, name: 'Nour E.'),
     ),
-    const BloodRequest(
-      id: 'r3',
-      hospitalName: 'Dar El Shefa Medical Center',
-      area: 'Heliopolis',
-      requesterName: 'Youssef A.',
+    BloodRequest(
+      id: 3,
+      status: 'PENDING',
       bloodType: BloodType.aPositive,
       urgency: UrgencyLevel.urgent,
-      distanceKm: 2.8,
-      postedAgo: '24 min ago',
-      unitsCollected: 0,
-      unitsNeeded: 2,
-    ),
-    const BloodRequest(
-      id: 'r4',
-      hospitalName: "Cairo Children's Cancer Hospital",
-      area: 'Sayeda Zeinab',
-      requesterName: 'Hala S.',
-      bloodType: BloodType.bPositive,
-      urgency: UrgencyLevel.urgent,
-      distanceKm: 5.4,
-      postedAgo: '1 hr ago',
-      unitsCollected: 2,
-      unitsNeeded: 4,
-    ),
-    const BloodRequest(
-      id: 'r5',
-      hospitalName: 'Maadi Military Hospital',
-      area: 'Maadi',
-      requesterName: 'Omar K.',
-      bloodType: BloodType.abNegative,
-      urgency: UrgencyLevel.routine,
-      distanceKm: 8.9,
-      postedAgo: '3 hrs ago',
-      unitsCollected: 0,
-      unitsNeeded: 1,
+      noOfUnits: 2,
+      noOfUnitsDonated: 0,
+      distance: 2.8,
+      requestedAt: '24 min ago',
+      hospital: const HospitalModel(id: 3, name: 'Dar El Shefa Medical Center', addressText: 'Heliopolis'),
+      requester: const RequesterModel(id: 3, name: 'Youssef A.'),
     ),
   ];
 
@@ -94,13 +70,68 @@ class MockBloodRequestRepository implements BloodRequestRepository {
         RequestFilter.all => true,
         RequestFilter.critical => r.urgency == UrgencyLevel.critical,
         RequestFilter.routine => r.urgency == UrgencyLevel.routine,
-      // "Compatible" will eventually be computed against the signed-in
-      // donor's blood type by the AI matching service; for now it just
-      // hides routine asks as a placeholder.
         RequestFilter.compatible => r.urgency != UrgencyLevel.routine,
       };
 
       return matchesQuery && matchesFilter;
     }).toList();
+  }
+
+  @override
+  Future<BloodRequest> createBloodRequest(Map<String, dynamic> data) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final hospitalData = data['hospital'] as Map<String, dynamic>?;
+    final hospitalName = hospitalData?['name'] ?? 'Mock Hospital';
+    final hospitalAddress = hospitalData?['address_text'] ?? 'Mock Area';
+
+    final newReq = BloodRequest(
+      id: _requests.length + 1,
+      status: 'PENDING',
+      bloodType: BloodType.fromLabel(data['blood_type']),
+      urgency: UrgencyLevel.fromBackend(data['urgency']),
+      noOfUnits: data['units_needed'] ?? data['no_of_units'] ?? 1,
+      noOfUnitsDonated: 0,
+      distance: 0.0,
+      hospital: HospitalModel(id: 1, name: hospitalName, addressText: hospitalAddress),
+      requester: const RequesterModel(id: 1, name: 'Current User'),
+    );
+    _requests.add(newReq);
+    return newReq;
+  }
+
+  @override
+  Future<List<BloodRequest>> getMyBloodRequests() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _requests.take(2).toList();
+  }
+
+  @override
+  Future<List<BloodRequest>> getCompatibleBloodRequests() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _requests;
+  }
+
+  @override
+  Future<BloodResponseModel> acceptBloodRequest(int id) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BloodResponseModel(id: 1, userId: 1, bloodRequestId: id, status: 'ACCEPT');
+  }
+
+  @override
+  Future<BloodResponseModel> rejectBloodRequest(int id) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BloodResponseModel(id: 2, userId: 1, bloodRequestId: id, status: 'REJECT');
+  }
+
+  @override
+  Future<List<BloodRequest>> getAcceptedBloodRequests() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return [];
+  }
+
+  @override
+  Future<SmartMatchingResponse> getSmartMatching() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    throw UnimplementedError();
   }
 }

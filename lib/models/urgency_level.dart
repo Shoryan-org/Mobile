@@ -2,13 +2,23 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 
 /// How urgently a request needs a donor. Each level carries its own
-/// display metadata (label + colors)
+/// display metadata (label + colors).
+///
+/// Backend values: EMERGENCY, CRITICAL, URGENT, NORMAL
 enum UrgencyLevel {
+  emergency(
+    'EMERGENCY',
+    AppColors.critical,
+    AppColors.criticalBackground,
+    formLabel: 'EMERGENCY',
+    formDescription: 'Life-threatening – needed immediately',
+    formIcon: Icons.emergency,
+  ),
   critical(
     'CRITICAL',
     AppColors.critical,
     AppColors.criticalBackground,
-    formLabel: 'Emergency',
+    formLabel: 'CRITICAL',
     formDescription: 'Needed within hours',
     formIcon: Icons.wb_sunny,
   ),
@@ -21,10 +31,10 @@ enum UrgencyLevel {
     formIcon: Icons.wb_sunny,
   ),
   routine(
-    'ROUTINE',
+    'NORMAL',
     AppColors.routine,
     AppColors.routineBackground,
-    formLabel: 'Planned',
+    formLabel: 'PLANNED',
     formDescription: 'Scheduled procedure',
     formIcon: Icons.wb_sunny,
   );
@@ -45,4 +55,13 @@ enum UrgencyLevel {
         required this.formDescription,
         required this.formIcon,
       });
+
+  /// Parses a backend urgency string (case-insensitive) to the enum value.
+  static UrgencyLevel fromBackend(String value) {
+    final upper = value.toUpperCase();
+    return UrgencyLevel.values.firstWhere(
+      (u) => u.label == upper,
+      orElse: () => UrgencyLevel.routine,
+    );
+  }
 }
