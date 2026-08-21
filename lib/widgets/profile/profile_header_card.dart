@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../models/donor_profile.dart';
+import '../../models/donor_profile_update.dart';
 import '../common/tag_pill.dart';
 import '../requests/blood_type_avatar.dart';
 
@@ -43,20 +43,24 @@ class ProfileHeaderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(profile.name, style: AppTextStyles.screenSubtitle.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                )),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 13, color: AppColors.textSecondary),
-                    const SizedBox(width: 3),
-                    Text(profile.city, style: AppTextStyles.cardSubtitle),
-                  ],
+                Text(
+                  profile.name.isEmpty ? '—' : profile.name,
+                  style: AppTextStyles.screenSubtitle.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
+                const SizedBox(height: 2),
+                if (profile.city.isNotEmpty)
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined,
+                          size: 13, color: AppColors.textSecondary),
+                      const SizedBox(width: 3),
+                      Text(profile.city, style: AppTextStyles.cardSubtitle),
+                    ],
+                  ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 6,

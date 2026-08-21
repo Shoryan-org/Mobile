@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_text_styles.dart';
 
 /// A generic rounded pill/tag: colored background, colored text, and an
-/// optional leading icon or dot. This is the shape behind "Donor",
-/// "Requester", "Verified" on Profile, and — after this change —
-/// `UrgencyBadge` on request cards too, so the two never visually drift.
+/// optional leading icon or dot. Used for "Donor" / "Requester" /
+/// "Verified" on Profile.
 class TagPill extends StatelessWidget {
   final String label;
   final Color background;
